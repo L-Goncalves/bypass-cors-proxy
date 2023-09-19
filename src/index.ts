@@ -46,8 +46,8 @@ app.post(
       });
 
       res.json({ ...response.data });
-    } catch (error) {
-      res.json(error);
+    } catch (error: any) {
+      res.status(error.response.status).json(error.message);
     }
   }
 );
@@ -61,14 +61,14 @@ app.post("/", async (req, res) => {
   const reqBody = req.body;
   const { body, url, headers } = reqBody;
 
-
   try {
     const response = await axios.post(url, body, {
       headers,
     });
+
     res.json({ ...response.data });
-  } catch (error) {
-    res.json(error);
+  } catch (error: any) {
+    res.json(error.message);
   }
 });
 
