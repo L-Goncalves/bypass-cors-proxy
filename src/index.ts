@@ -5,7 +5,7 @@ import { imageProxyValidation, proxyValidation } from "./validation";
 
 const app = express();
 const port = process.env.PORT || 3001;
-const upload = multer();
+const upload = multer({ limits: { fieldSize: 25 * 1024 * 1024 }});
 // Middleware to enable CORS
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -18,12 +18,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb"}));
 
 // Define your proxy route(s) here
 app.post(
   "/image",
-  upload.fields([{ name: "url" }, { name: "headers" }, { name: "image" }]),
   async (req, res) => {
     try {
       const { error } = imageProxyValidation.validate(req.body);
@@ -52,6 +51,7 @@ app.post(
   }
 );
 
+
 app.post("/", async (req, res) => {
   const { error } = proxyValidation.validate(req.body);
 
@@ -63,6 +63,26 @@ app.post("/", async (req, res) => {
 
   try {
     const response = await axios.post(url, body, {
+      headers,
+    });
+
+    res.json({ ...response.data });
+  } catch (error: any) {
+    res.json(error.message);
+  }
+});
+
+app.put("/", async (req, res) => {
+  const { error } = proxyValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+  const reqBody = req.body;
+  const { body, url, headers } = reqBody;
+
+  try {
+    const response = await axios.put(url, body, {
       headers,
     });
 
