@@ -68,7 +68,11 @@ app.post("/", async (req, res) => {
 
     res.json({ ...response.data });
   } catch (error: any) {
-    res.json(error.message);
+    if(error?.response?.data){
+      res.json(error?.response?.data);
+    } else{
+      res.json(error.message);
+    }
   }
 });
 
